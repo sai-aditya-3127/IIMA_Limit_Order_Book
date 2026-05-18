@@ -521,25 +521,3 @@ Please follow the existing code style (PEP 8 for Python, consistent template str
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.   python manage.py runserver
    ```
-9. **Access the application:**
-   Open your web browser and go to `http://127.0.0.1  :8000/`.
-
-## Usage
-
-- Register a new account or log in with an existing account.
-- Place limit orders for buying or selling stocks.
-- Modify or cancel your existing orders as needed.
-- Admin users can manage users and view all orders.
-
-## Contributing
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Commit your changes (`git commit -m 'Add your feature'`)
-5. Push to the branch (`git push origin feature/your-feature`)
-6. Create a pull request
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
