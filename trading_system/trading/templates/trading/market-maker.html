@@ -362,12 +362,12 @@
             <h4>Bid (Buy)</h4>
             <div class="form-group">
               <label for="bid_quantity">Total Quantity</label>
-              <input type="number" id="bid_quantity" class="form-control" required min="1" onchange="validateDisclosed('bid')">
+              <input type="number" id="bid_quantity" class="form-control" required min="1" step="1" onchange="validateDisclosed('bid')">
               <small style="color: var(--muted);">Full order size</small>
             </div>
             <div class="form-group">
               <label for="bid_disclosed">Disclosed Qty <span style="color: #2ea043; font-weight: 600;">🔓 Iceberg</span></label>
-              <input type="number" id="bid_disclosed" class="form-control" required min="1" onchange="validateDisclosed('bid')" placeholder="Visible on orderbook">
+              <input type="number" id="bid_disclosed" class="form-control" required min="1" step="1" onchange="validateDisclosed('bid')" placeholder="Visible on orderbook">
               <small id="bid_disclosed_hint" style="color: var(--muted);">Min: <span id="bid_min_disc">-</span> | Hidden: <span id="bid_hidden">-</span></small>
             </div>
             <div class="form-group">
@@ -400,12 +400,12 @@
             <h4>Ask (Sell)</h4>
             <div class="form-group">
               <label for="ask_quantity">Total Quantity</label>
-              <input type="number" id="ask_quantity" class="form-control" required min="1" onchange="validateDisclosed('ask')">
+              <input type="number" id="ask_quantity" class="form-control" required min="1" step="1" onchange="validateDisclosed('ask')">
               <small style="color: var(--muted);">Full order size</small>
             </div>
             <div class="form-group">
               <label for="ask_disclosed">Disclosed Qty <span style="color: #2ea043; font-weight: 600;">🔓 Iceberg</span></label>
-              <input type="number" id="ask_disclosed" class="form-control" required min="1" onchange="validateDisclosed('ask')" placeholder="Visible on orderbook">
+              <input type="number" id="ask_disclosed" class="form-control" required min="1" step="1" onchange="validateDisclosed('ask')" placeholder="Visible on orderbook">
               <small id="ask_disclosed_hint" style="color: var(--muted);">Min: <span id="ask_min_disc">-</span> | Hidden: <span id="ask_hidden">-</span></small>
             </div>
             <div class="form-group">
@@ -418,8 +418,8 @@
               <div class="yn-toggle" id="ask_is_ioc_toggle">
                 <button type="button" class="yn-option active" data-value="False" onclick="setBinaryToggle('ask_is_ioc', 'False')">No</button>
                 <button type="button" class="yn-option" data-value="True" onclick="setBinaryToggle('ask_is_ioc', 'True')">Yes</button>
-              </div> -->
-            </div>
+              </div>
+            </div> -->
             <div class="form-group">
               <label for="ask_stoploss">Stoploss Order</label>
               <input type="hidden" id="ask_stoploss" value="NO">
@@ -688,20 +688,24 @@ document.addEventListener('DOMContentLoaded', async function(){
   bidQuantityInput.addEventListener('input', function () {
     // bidDisclosedInput.value = this.value;
     //syncPairedQuantities('bid');
+    this.value = this.value.replace(/[^0-9]/g, '');
     validateDisclosed('bid');
   });
 
   askQuantityInput.addEventListener('input', function () {
     // askDisclosedInput.value = this.value;
     //syncPairedQuantities('ask');
+    this.value = this.value.replace(/[^0-9]/g, '');
     validateDisclosed('ask');
   });
 
   bidDisclosedInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
     validateDisclosed('bid');
   });
 
   askDisclosedInput.addEventListener('input', function () {
+    this.value = this.value.replace(/[^0-9]/g, '');
     validateDisclosed('ask');
   });
 
