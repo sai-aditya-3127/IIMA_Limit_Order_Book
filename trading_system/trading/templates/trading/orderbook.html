@@ -120,9 +120,10 @@
       <div class="table-responsive">
         <table id="buy-orders" class="table">
           <thead>
-            <tr><th>Price</th><th>Quantity</th></tr>
+            <!-- <tr><th>Price</th><th>Quantity</th></tr> -->
+             <tr><th>Price</th><th>Disclosed Qty</th><th>Total Qty</th></tr> 
           </thead>
-          <tbody><tr><td colspan="2">Waiting for update...</td></tr></tbody>
+          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -134,9 +135,10 @@
       <div class="table-responsive">
         <table id="sell-orders" class="table">
           <thead>
-            <tr><th>Price</th><th>Quantity</th></tr>
+            <!-- <tr><th>Price</th><th>Quantity</th></tr> -->
+             <tr><th>Price</th><th>Disclosed Qty</th><th>Total Qty</th></tr>
           </thead>
-          <tbody><tr><td colspan="2">Waiting for update...</td></tr></tbody>
+          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -324,9 +326,11 @@
           .forEach(o => {
             const price = parseFloat(o.price).toFixed(2);
             const disc  = parseFloat(o.disclosed) || 0;
+            const qty   = parseFloat(o.quantity)  || 0;
 
             if (!grouped[price]) grouped[price] = { disclosed: 0 };
             grouped[price].disclosed += disc;
+            grouped[price].total     += qty;
 
             if (!buyOrdersByPrice[price]) buyOrdersByPrice[price] = [];
             buyOrdersByPrice[price].push(o);
@@ -339,6 +343,7 @@
             tr.innerHTML = `
               <td>${price}</td>
               <td>${disclosed}</td>
+              <td>${total}</td>
             `;
             tbody.appendChild(tr);
           });
@@ -393,9 +398,11 @@
           .forEach(o => {
             const price     = parseFloat(o.price).toFixed(2);
             const disclosed = parseFloat(o.disclosed) || 0;
+            const qty       = parseFloat(o.quantity)  || 0;
 
             if (!grouped[price]) grouped[price] = { disclosed: 0 };
             grouped[price].disclosed += disclosed;
+            grouped[price].total     += qty;
 
             if (!sellOrdersByPrice[price]) sellOrdersByPrice[price] = [];
             sellOrdersByPrice[price].push(o);
@@ -408,6 +415,7 @@
             tr.innerHTML = `
               <td>${price}</td>
               <td>${disclosed}</td>
+              <td>${total}</td>
             `;
             tbody.appendChild(tr);
           });

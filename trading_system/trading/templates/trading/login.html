@@ -48,6 +48,13 @@
   <div class="card auth-card">
     <form method="post" action="{% url 'login' %}">
       {% csrf_token %}
+      {% if messages %}
+        {% for message in messages %}
+          <div style="margin-bottom: 16px; padding: 10px 14px; border-radius: 8px; border-left: 4px solid var(--danger); background: rgba(255,107,107,0.1); color: var(--danger); font-size: 0.85rem;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
       <h2>Welcome Back</h2>
       <p class="auth-sub">Login to access your account</p>
 
@@ -62,7 +69,7 @@
       </div>
 
       <button type="submit" class="btn" style="width: 100%;">Login</button>
-      
+
     </form>
   </div>
 </div>
