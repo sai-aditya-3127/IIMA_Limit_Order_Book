@@ -14,7 +14,7 @@ import io
 from django.contrib import messages
 from .forms import UserRegisterForm
 from .utils import broadcast_orderbook_update  # Assuming broadcast_orderbook_update is in utils.py
-from django.contrib.auth import logout as auth_logout
+from django.contrib.auth import logout as auth_logout, authenticate, login as auth_login
 
 from .utils import match_order  # Assuming match_order is in utils.py
 from django.http import JsonResponse
@@ -58,19 +58,39 @@ def _serialize_order(order):
         'original_quantity': order.original_quantity,
     }
 
+# def login(request):
+#     if request.method == 'POST':
+#         username = request.POST.get('username')
+#         user_type = request.POST.get('user_type')
+
+#         if user_type == 'TRADER':
+#             user, created = Trader.objects.get_or_create(username=username,role="TRADER")
+#             return redirect('trader_home', user_id=user.id)
+#         else:
+#             user, created = MarketMaker.objects.get_or_create(username=username,role="MARKET_MAKER")
+#             return redirect('market_maker_home', user_id=user.id)
+
+        
+#     return render(request, 'trading/login.html')
+
+
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
-        user_type = request.POST.get('user_type')
+        password = request.POST.get('password')
 
-        if user_type == 'TRADER':
-            user, created = Trader.objects.get_or_create(username=username,role="TRADER")
-            return redirect('trader_home', user_id=user.id)
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            if user.role == 'TRADER':
+                return redirect('trader_home')
+            elif user.role == 'MARKET_MAKER':
+                return redirect('mm_home')
+            elif user.role == 'ADMIN':
+                return redirect('admin_home')
         else:
-            user, created = MarketMaker.objects.get_or_create(username=username,role="MARKET_MAKER")
-            return redirect('market_maker_home', user_id=user.id)
+            return render(request, 'trading/login.html', {'error': 'Incorrect credentials. Please try again.'})
 
-        
     return render(request, 'trading/login.html')
 
 
