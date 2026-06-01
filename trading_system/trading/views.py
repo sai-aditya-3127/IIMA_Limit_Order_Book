@@ -803,12 +803,27 @@ def get_sell_orders(request):
         return JsonResponse({'sell_orders': [_serialize_order(order) for order in sell_orders]})
     return JsonResponse({'sell_orders': []}, status=405)
 
+# @login_required
+# def get_recent_trades(request):
+#     if request.method == 'GET':
+#         recent_trades = Trade.objects.all().order_by('-timestamp')[:10].values(
+#             'price', 'quantity', 'timestamp'
+#         )  # Hide buyer and seller information
+#         return JsonResponse({'trades': list(recent_trades)})
+#     return JsonResponse({'trades': []}, status=405)
+
 @login_required
 def get_recent_trades(request):
     if request.method == 'GET':
-        recent_trades = Trade.objects.all().order_by('-timestamp')[:10].values(
-            'price', 'quantity', 'timestamp'
-        )  # Hide buyer and seller information
+        base_user = _get_or_create_base_user(request.user)
+        if base_user and base_user.role == 'ADMIN':
+            recent_trades = Trade.objects.all().order_by('-timestamp')[:10].values(
+                'buyer__user_id', 'seller__user_id', 'price', 'quantity', 'timestamp'
+            )
+        else:
+            recent_trades = Trade.objects.all().order_by('-timestamp')[:10].values(
+                'price', 'quantity', 'timestamp'
+            )
         return JsonResponse({'trades': list(recent_trades)})
     return JsonResponse({'trades': []}, status=405)
 

@@ -120,10 +120,14 @@
       <div class="table-responsive">
         <table id="buy-orders" class="table">
           <thead>
-            <!-- <tr><th>Price</th><th>Quantity</th></tr> -->
-             <tr><th>Price</th><th>Disclosed Qty</th><th>Total Qty</th></tr> 
+            <tr>
+              <th>Price</th>
+              <th>Disclosed Qty</th>
+              {% if base_role == 'ADMIN' %}<th>Total Qty</th>{% endif %}
+            </tr>
           </thead>
-          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody>
+          <!-- <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody> -->
+           <tbody><tr><td colspan="{% if base_role == 'ADMIN' %}3{% else %}2{% endif %}">Waiting for update...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -135,10 +139,13 @@
       <div class="table-responsive">
         <table id="sell-orders" class="table">
           <thead>
-            <!-- <tr><th>Price</th><th>Quantity</th></tr> -->
-             <tr><th>Price</th><th>Disclosed Qty</th><th>Total Qty</th></tr>
+            <tr>
+              <th>Price</th>
+              <th>Disclosed Qty</th>
+              {% if base_role == 'ADMIN' %}<th>Total Qty</th>{% endif %}
+            </tr>
           </thead>
-          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody>
+          <tbody><tr><td colspan="{% if base_role == 'ADMIN' %}3{% else %}2{% endif %}">Waiting for update...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -192,12 +199,19 @@
       </div>
       <div class="table-responsive">
         <table id="trades" class="table">
-          <thead>
+          <!-- <thead>
             <tr>
               <th>Price</th><th>Quantity</th><th>Timestamp</th>
             </tr>
           </thead>
-          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody>
+          <tbody><tr><td colspan="3">Waiting for update...</td></tr></tbody> -->
+          <thead>
+            <tr>
+              {% if base_role == 'ADMIN' %}<th>Buyer</th><th>Seller</th>{% endif %}
+              <th>Price</th><th>Quantity</th><th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody><tr><td colspan="{% if base_role == 'ADMIN' %}5{% else %}3{% endif %}">Waiting for update...</td></tr></tbody>
         </table>
       </div>
     </div>
@@ -207,6 +221,7 @@
 
 {% block scripts %}
 <script>
+  const IS_ADMIN = "{{ base_role }}" === "ADMIN";
   function updateBestBid() {
     fetch('/orderbook/get_best_bid/')
       .then(response => response.json())
@@ -328,7 +343,7 @@
             const disc  = parseFloat(o.disclosed) || 0;
             const qty   = parseFloat(o.quantity)  || 0;
 
-            if (!grouped[price]) grouped[price] = { disclosed: 0 };
+            if (!grouped[price]) grouped[price] = { disclosed: 0, total: 0 };
             grouped[price].disclosed += disc;
             grouped[price].total     += qty;
 
@@ -338,12 +353,12 @@
 
         Object.entries(grouped)
           .sort((a,b) => parseFloat(b[0]) - parseFloat(a[0]))
-          .forEach(([price, {disclosed}]) => {
+          .forEach(([price, { disclosed, total }]) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${price}</td>
               <td>${disclosed}</td>
-              <td>${total}</td>
+              ${IS_ADMIN ? `<td>${total}</td>` : ''}
             `;
             tbody.appendChild(tr);
           });
@@ -400,7 +415,7 @@
             const disclosed = parseFloat(o.disclosed) || 0;
             const qty       = parseFloat(o.quantity)  || 0;
 
-            if (!grouped[price]) grouped[price] = { disclosed: 0 };
+            if (!grouped[price]) grouped[price] = { disclosed: 0, total: 0 };
             grouped[price].disclosed += disclosed;
             grouped[price].total     += qty;
 
@@ -410,12 +425,12 @@
 
         Object.entries(grouped)
           .sort((a, b) => parseFloat(a[0]) - parseFloat(b[0]))
-          .forEach(([price, { disclosed }]) => {
+          .forEach(([price, { disclosed, total }]) => {
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${price}</td>
               <td>${disclosed}</td>
-              <td>${total}</td>
+              ${IS_ADMIN ? `<td>${total}</td>` : ''}
             `;
             tbody.appendChild(tr);
           });
@@ -423,24 +438,44 @@
       .catch(console.error);
   }
 
+  // function updateRecentTrades() {
+  //   fetch('/orderbook/get_recent_trades/')
+  //     .then(response => response.json())
+  //     .then(data => {
+  //       const tableBody = document.querySelector('#trades tbody');
+  //       tableBody.innerHTML = '';
+  //       data.trades.forEach(trade => {
+  //         const row = `
+  //           <tr>
+  //             <td>${trade.price}</td>
+  //             <td>${trade.quantity}</td>
+  //             <td>${trade.timestamp}</td>
+  //           </tr>`;
+  //         tableBody.innerHTML += row;
+  //       });
+  //     })
+  //     .catch(error => console.error('Error fetching Recent Trades:', error));
+  // }
+
   function updateRecentTrades() {
-    fetch('/orderbook/get_recent_trades/')
-      .then(response => response.json())
-      .then(data => {
-        const tableBody = document.querySelector('#trades tbody');
-        tableBody.innerHTML = '';
-        data.trades.forEach(trade => {
-          const row = `
-            <tr>
-              <td>${trade.price}</td>
-              <td>${trade.quantity}</td>
-              <td>${trade.timestamp}</td>
-            </tr>`;
-          tableBody.innerHTML += row;
-        });
-      })
-      .catch(error => console.error('Error fetching Recent Trades:', error));
-  }
+  fetch('/orderbook/get_recent_trades/')
+    .then(response => response.json())
+    .then(data => {
+      const tableBody = document.querySelector('#trades tbody');
+      tableBody.innerHTML = '';
+      data.trades.forEach(trade => {
+        const row = `
+          <tr>
+            ${IS_ADMIN ? `<td>${trade.buyer__user_id ?? '-'}</td><td>${trade.seller__user_id ?? '-'}</td>` : ''}
+            <td>${trade.price}</td>
+            <td>${trade.quantity}</td>
+            <td>${trade.timestamp}</td>
+          </tr>`;
+        tableBody.innerHTML += row;
+      });
+    })
+    .catch(error => console.error('Error fetching Recent Trades:', error));
+}
 
   document.addEventListener('DOMContentLoaded', function (){
     updateBuyOrders();
@@ -483,11 +518,32 @@
       document.getElementById("best-ask").innerText = `Price: ${data.best_ask.price} | Quantity: ${data.best_ask.disclosed}`;
     }
 
+    // if (data.buy_orders) {
+    //   const buyOrdersTable = document.querySelector("#buy-orders tbody");
+    //   buyOrdersTable.innerHTML = "";
+    //   data.buy_orders.forEach(order => {
+    //     buyOrdersTable.innerHTML += `<tr><td>${order.price}</td><td>${order.disclosed}</td></tr>`;
+    //   });
+    // }
+
+    // if (data.sell_orders) {
+    //   const sellOrdersTable = document.querySelector("#sell-orders tbody");
+    //   sellOrdersTable.innerHTML = "";
+    //   data.sell_orders.forEach(order => {
+    //     sellOrdersTable.innerHTML += `<tr><td>${order.price}</td><td>${order.disclosed}</td></tr>`;
+    //   });
+    // }
+
     if (data.buy_orders) {
       const buyOrdersTable = document.querySelector("#buy-orders tbody");
       buyOrdersTable.innerHTML = "";
       data.buy_orders.forEach(order => {
-        buyOrdersTable.innerHTML += `<tr><td>${order.price}</td><td>${order.disclosed}</td></tr>`;
+        buyOrdersTable.innerHTML += `
+          <tr>
+            <td>${order.price}</td>
+            <td>${order.disclosed}</td>
+            ${IS_ADMIN ? `<td>${order.quantity}</td>` : ''}
+          </tr>`;
       });
     }
 
@@ -495,9 +551,29 @@
       const sellOrdersTable = document.querySelector("#sell-orders tbody");
       sellOrdersTable.innerHTML = "";
       data.sell_orders.forEach(order => {
-        sellOrdersTable.innerHTML += `<tr><td>${order.price}</td><td>${order.disclosed}</td></tr>`;
+        sellOrdersTable.innerHTML += `
+          <tr>
+            <td>${order.price}</td>
+            <td>${order.disclosed}</td>
+            ${IS_ADMIN ? `<td>${order.quantity}</td>` : ''}
+          </tr>`;
       });
     }
+
+    // if (data.trades) {
+    //   const tradesTable = document.querySelector("#trades tbody");
+    //   tradesTable.innerHTML = "";
+    //   data.trades.forEach(trade => {
+    //     tradesTable.innerHTML += `
+    //       <tr>
+    //         <td>${trade.buyer}</td>
+    //         <td>${trade.seller}</td>
+    //         <td>${trade.price}</td>
+    //         <td>${trade.quantity}</td>
+    //         <td>${trade.timestamp || '-'}</td>
+    //       </tr>`;
+    //   });
+    // }
 
     if (data.trades) {
       const tradesTable = document.querySelector("#trades tbody");
@@ -505,8 +581,7 @@
       data.trades.forEach(trade => {
         tradesTable.innerHTML += `
           <tr>
-            <td>${trade.buyer}</td>
-            <td>${trade.seller}</td>
+            ${IS_ADMIN ? `<td>${trade.buyer__user_id ?? '-'}</td><td>${trade.seller__user_id ?? '-'}</td>` : ''}
             <td>${trade.price}</td>
             <td>${trade.quantity}</td>
             <td>${trade.timestamp || '-'}</td>
